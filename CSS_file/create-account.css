@@ -1,0 +1,81 @@
+.outer-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 98vh;
+}
+.inner-div{
+    display: flex;
+    width: 50em;
+    border: 4px solid black;
+    box-shadow: 1px 1px 5px blueviolet;
+    border-radius: 32px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    padding-top: 5%;
+    padding-bottom: 10%;
+}
+.input-box{
+    box-shadow: 1px 1px 5px blueviolet;
+    font-family: raleway,calibri;
+    width: 100%;
+    height: 65px;
+    margin-bottom: 1.5%;
+    border: 4px solid black;
+    text-indent: 40px;
+    font-size: 20px;
+    border-radius: 20px;
+}
+.input-box:hover{
+    box-shadow: 1px 1px 8px blueviolet;
+}
+.input-box:focus{
+    background-color: azure;
+}
+.create-button{
+    font-family: raleway,calibri;
+    color: white;
+    box-shadow: 1px 1px 5px blueviolet;
+    border: 2px solid black;
+    width:80%;
+    height: 65px;
+    margin-top: 1.5%;
+    font-size: 20px;
+    border-radius: 10px;
+    background-color: blueviolet;
+}
+.create-button:hover{
+    opacity: 0.9;
+}
+.test-div{
+    width: 80%;
+    display: flex;
+}
+.header-name{
+    font-family: calibri,serif;
+    font-size: 28px;
+    font-style: italic;
+    text-shadow: 1px 1px black;
+    color: blueviolet;
+    font-weight: bold;
+}
+.icons-person{
+    position: absolute;
+    margin-left: 0.6%;
+    margin-top: 1.5%;
+    width: 26px;
+}
+.icons-email{
+    position: absolute;
+    margin-left: 0.3%;
+    margin-top: 1.2%;
+    width: 35px;
+}
+.icons-password{
+    position: absolute;
+    margin-left: 0.3%;
+    margin-top: 1.2%;
+    width: 35px;
+}

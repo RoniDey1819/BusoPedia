@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bus Adda / Check Buses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="CSS_file/check-bus.css">
+    <style>
+        /* Define styles for the busDetailsContainer */
+        #busDetailsContainer {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            margin-bottom: 1%;
+        }
+
+        /* Style for individual bus details */
+        .bus-details {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-bottom: 1%;
+            border-radius: 32px;
+            border: none;
+            box-shadow: 2px 2px 6px rgb(5, 5, 5);
+            background-color: white;
+        }
+
+        /* Style for the button inside bus-details */
+        .button-div {
+            width: 100%;
+            padding: 0px;
+            border-radius: 32px;
+            height: 8.5em;
+            border: none;
+            background-color: white;
+        }
+
+        /* Style for hover effect */
+        .button-div:hover {
+            box-shadow: 2px 2px 10px rgb(130, 70, 30);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        /* Style for bus name */
+        .bus-name {
+            margin-top: 16px;
+            margin-left: 12%;
+            font-size: 20px;
+            color: black;
+            text-decoration: none;
+            font-family: 'Roboto', sans-serif; /* Use the desired font */
+        }
+
+        /* Style for source-destination */
+        .source-destination {
+            margin-left: 10.5%;
+            font-size: 20px;
+            font-style: italic;
+            margin-top: -8px;
+            position: absolute;
+            font-family: 'Roboto', sans-serif; /* Use the desired font */
+        }
+
+        /* Style for source-destination in header-div */
+        .source-destination-header {
+            font-size: 20px;
+            font-style: italic;
+            margin-top: -8px;
+            font-family: 'Roboto', sans-serif; /* Use the desired font */
+        }
+    </style>
+</head>
+<body>
+    <img class="background-image" src="layered-peaks-haikei (4).svg" alt="Background Image">
+    <div class="base">
+        <div class="header-div">
+            <p class="source-name" id="sourceName">Source Name</p>
+            <span class="source-name">&LongRightArrow;</span>
+            <p class="source-name" id="destinationName">Destination Name</p>
+        </div>
+
+        <!-- Repeat the bus-details div structure for each bus entry -->
+        <div id="busDetailsContainer">
+            <!-- Bus details will be dynamically added here -->
+        </div>
+
+        <div style="color: transparent;">.</div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to parse JSON data from URL parameter
+            function parseJsonFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const jsonDataParam = urlParams.get("jsonData");
+                return JSON.parse(jsonDataParam);
+            }
+
+            // Function to create and append a single "bus-details" div
+            function createBusDetailsElement(bus) {
+                const busNameElement = document.createElement("span");
+                busNameElement.classList.add("bus-name");
+                busNameElement.textContent = `Bus Name: ${bus.name}`;
+
+                const sourceDestinationElement = document.createElement("div");
+                sourceDestinationElement.classList.add("source-destination");
+                sourceDestinationElement.textContent = `${bus.stopages[0].stopage} &LongRightArrow; ${bus.stopages[bus.stopages.length - 1].stopage}`;
+
+                const buttonDiv = document.createElement("div");
+                buttonDiv.classList.add("button-div");
+                buttonDiv.appendChild(busNameElement);
+                buttonDiv.appendChild(sourceDestinationElement);
+
+                const link = document.createElement("a");
+                link.href = "check-status.html";
+                link.appendChild(buttonDiv);
+
+                const busDetails = document.createElement("div");
+                busDetails.classList.add("bus-details");
+                busDetails.appendChild(link);
+
+                return busDetails;
+            }
+
+            // Parse JSON data and display bus details
+            const jsonData = parseJsonFromUrl();
+            const busDetailsContainer = document.getElementById("busDetailsContainer");
+
+            jsonData.forEach((bus) => {
+                const busDetails = createBusDetailsElement(bus);
+                busDetailsContainer.appendChild(busDetails);
+            });
+
+            // Get source and destination from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const source = urlParams.get("source");
+            const destination = urlParams.get("destination");
+
+            // Display source and destination in header-div
+            const sourceNameElement = document.getElementById("sourceName");
+            const destinationNameElement = document.getElementById("destinationName");
+            sourceNameElement.textContent = `Source: ${source}`;
+            destinationNameElement.textContent = `Destination: ${destination}`;
+        });
+    </script>
+</body>
+</html>
