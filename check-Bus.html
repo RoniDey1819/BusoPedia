@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bus Adda / Check Buses</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus-o-Pedia / Check Buses</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -17,8 +19,6 @@
 
         /* Style for individual bus details */
         .bus-details {
-            display: flex;
-            flex-direction: column;
             width: 100%;
             margin-bottom: 1%;
             border-radius: 32px;
@@ -29,6 +29,9 @@
 
         /* Style for the button inside bus-details */
         .button-div {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             width: 100%;
             padding: 0px;
             border-radius: 32px;
@@ -46,20 +49,27 @@
 
         /* Style for bus name */
         .bus-name {
-            margin-top: 16px;
-            margin-left: 12%;
+            position: absolute;
+            margin-left: 10.8%;
+            margin-top: -3%;
+            font-family: calibri;
+            font-weight: 500;
             font-size: 20px;
             color: black;
             text-decoration: none;
+            color: black;
             font-family: 'Roboto', sans-serif; /* Use the desired font */
+            background-color: white;
         }
 
         /* Style for source-destination */
         .source-destination {
+            position:  absolute;
+            margin-top: 0.7%;
             margin-left: 10.5%;
             font-size: 20px;
+            color: rgb(139, 39, 3);
             font-style: italic;
-            margin-top: -8px;
             position: absolute;
             font-family: 'Roboto', sans-serif; /* Use the desired font */
         }
@@ -68,7 +78,17 @@
         .source-destination-header {
             font-size: 20px;
             font-style: italic;
-            margin-top: -8px;
+            margin-top: 8px;
+            font-family: 'Roboto', sans-serif; /* Use the desired font */
+        }
+
+        /* Style for error-div */
+        .error-div {
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffcccc; /* Light red background */
+            border: 1px solid #ff0000; /* Red border */
+            border-radius: 8px;
             font-family: 'Roboto', sans-serif; /* Use the desired font */
         }
     </style>
@@ -87,7 +107,10 @@
             <!-- Bus details will be dynamically added here -->
         </div>
 
-        <div style="color: transparent;">.</div>
+        <!-- Error message div -->
+        <div id="error-div" class="error-div" style="display: none;">
+            Source or Destination not found
+        </div>
     </div>
 
     <script>
@@ -98,53 +121,89 @@
                 const jsonDataParam = urlParams.get("jsonData");
                 return JSON.parse(jsonDataParam);
             }
-
+    
             // Function to create and append a single "bus-details" div
             function createBusDetailsElement(bus) {
                 const busNameElement = document.createElement("span");
                 busNameElement.classList.add("bus-name");
                 busNameElement.textContent = `Bus Name: ${bus.name}`;
-
+    
                 const sourceDestinationElement = document.createElement("div");
                 sourceDestinationElement.classList.add("source-destination");
-                sourceDestinationElement.textContent = `${bus.stopages[0].stopage} &LongRightArrow; ${bus.stopages[bus.stopages.length - 1].stopage}`;
-
+                sourceDestinationElement.textContent = `${bus.stopages[0].stopage} To ${bus.stopages[bus.stopages.length - 1].stopage}`;
+    
                 const buttonDiv = document.createElement("div");
                 buttonDiv.classList.add("button-div");
-                buttonDiv.appendChild(busNameElement);
-                buttonDiv.appendChild(sourceDestinationElement);
-
+    
+                // Create a link with the busName as a query parameter
                 const link = document.createElement("a");
-                link.href = "check-status.html";
-                link.appendChild(buttonDiv);
-
+                link.href = `check-status.html?busName=${bus.name}`;
+                link.appendChild(busNameElement);
+                link.appendChild(sourceDestinationElement);
+                buttonDiv.appendChild(link);
+    
                 const busDetails = document.createElement("div");
                 busDetails.classList.add("bus-details");
-                busDetails.appendChild(link);
-
+                busDetails.appendChild(buttonDiv);
+    
                 return busDetails;
             }
-
+    
             // Parse JSON data and display bus details
             const jsonData = parseJsonFromUrl();
             const busDetailsContainer = document.getElementById("busDetailsContainer");
+    
+            // Check if jsonData is not null before iterating
+            if (jsonData !== null) {
+                jsonData.forEach((bus) => {
+                    const busDetails = createBusDetailsElement(bus);
+                    busDetailsContainer.appendChild(busDetails);
+                });
+    
+                // Get source and destination from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const source = urlParams.get("source");
+                const destination = urlParams.get("destination");
+    
+                // Display source and destination in header-div
+                const sourceNameElement = document.getElementById("sourceName");
+                const destinationNameElement = document.getElementById("destinationName");
+    
+                // Check if source and destination are present in the JSON data
+                const sourceFound = jsonData.some((bus) => bus.stopages.some((stopage) => stopage.stopage.toLowerCase() === source.toLowerCase()));
+                const destinationFound = jsonData.some((bus) => bus.stopages.some((stopage) => stopage.stopage.toLowerCase() === destination.toLowerCase()));
+    
+                if (sourceFound && destinationFound) {
+                    sourceNameElement.textContent = `Source: ${source}`;
+                    destinationNameElement.textContent = `Destination: ${destination}`;
+                } else {
+                    // Display error message if source or destination is not found
+                    const errorDiv = document.createElement("div");
+                    errorDiv.id = "error-div";
+                    errorDiv.classList.add("error-div");
+                    errorDiv.textContent = "Source or Destination not found";
+                    document.body.appendChild(errorDiv);
+    
+                    // Hide the bus details container
+                    busDetailsContainer.style.display = "none";
+                }
+            } else {
+                // Handle the case where jsonData is null (e.g., source or destination not found)
+                const errorDiv = document.createElement("div");
+                errorDiv.id = "error-div";
+                errorDiv.classList.add("error-div");
+                errorDiv.textContent = "Source or Destination not found";
+                document.body.appendChild(errorDiv);
+    
+                // Hide the bus details container
+                busDetailsContainer.style.display = "none";
 
-            jsonData.forEach((bus) => {
-                const busDetails = createBusDetailsElement(bus);
-                busDetailsContainer.appendChild(busDetails);
-            });
-
-            // Get source and destination from URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const source = urlParams.get("source");
-            const destination = urlParams.get("destination");
-
-            // Display source and destination in header-div
-            const sourceNameElement = document.getElementById("sourceName");
-            const destinationNameElement = document.getElementById("destinationName");
-            sourceNameElement.textContent = `Source: ${source}`;
-            destinationNameElement.textContent = `Destination: ${destination}`;
+                const baseDiv = document.querySelector(".base");
+                baseDiv.style.display = "none";
+            }
         });
     </script>
+    
+    
 </body>
 </html>

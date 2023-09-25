@@ -2,7 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	reply "github.com/PratikforCoding/BusoPedia.git/json"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +18,15 @@ func (apiCfg *APIConfig)HandlerGetBuses(w http.ResponseWriter, r *http.Request) 
 	}
 
 	source := r.URL.Query().Get("source")
+	source = strings.ToLower(source)
 	destination := r.URL.Query().Get("destination")
+	destination = strings.ToLower(destination)
+
+	if source == "" || destination == "" {
+		// Return an empty response or an appropriate message.
+		reply.RespondWtihError(w, http.StatusBadRequest, "didn't provide source or destination")
+		return
+	}
 
 	buses := apiCfg.getBuses(source, destination)
 	reply.RespondWithJson(w, http.StatusFound, buses)
@@ -44,24 +54,52 @@ func (apiCfg *APIConfig)HandlerAddBuses(w http.ResponseWriter, r *http.Request) 
 }
 
 func (apiCfg *APIConfig)HandlerGetBusByName(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		Name string `json:"name"`
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
-	err := decoder.Decode(&params)
-	if err != nil {
-		reply.RespondWtihError(w, http.StatusInternalServerError, "Couldn't decode parameters")
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	foundBus, err := apiCfg.getBusByName(params.Name)
+	busname := r.URL.Query().Get("busName")
+	fmt.Println(busname)
+	if busname == "" {
+		// Return an empty response or an appropriate message.
+		reply.RespondWtihError(w, http.StatusBadRequest, "didn't provide bus name")
+		return
+	}
+
+	foundBus, err := apiCfg.getBusByName(busname)
 	if err != nil {
 		reply.RespondWtihError(w, http.StatusNotFound, "Bus not found")
 		return 
 	}
 	reply.RespondWithJson(w, http.StatusFound, foundBus)
+}
+
+func (apiCfg *APIConfig) HandlerGetBusStopagesByName(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	busName := r.URL.Query().Get("busName")
+	fmt.Println(busName)
+	if busName == "" {
+		// Return an empty response or an appropriate message.
+		reply.RespondWithJson(w, http.StatusBadRequest, "Didn't provide bus name")
+		return
+	}
+
+	bus, err := apiCfg.getBusByName(busName)
+	if err != nil {
+		reply.RespondWtihError(w, http.StatusNotFound, "bus not available")
+		return 
+	}
+
+	retStopages := bson.M {
+		"stopages": bus["stopages"].(primitive.A),
+	}
+
+	reply.RespondWithJson(w, http.StatusOK, retStopages)
 }
 
 func (apiCfg *APIConfig)HandlerCreateAccount(w http.ResponseWriter, r *http.Request) {
